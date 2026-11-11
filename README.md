@@ -7,7 +7,8 @@ Bilgi işlem stajında gördüğüm donanım envanteri ve cihaz bakım süreçle
 - Demirbaş numarası, cihaz türü, birim ve durum ile cihaz kaydı
 - Cihazları listeleme ve demirbaş numarasıyla arama
 - Birim ve duruma göre filtreleme
-- Cihaz durumunu güncelleme ve envanter özeti
+- Cihaz durumunu güncelleme, cihaz türü ve birim bilgilerini düzenleme
+- Envanter özeti ve Excel ile açılabilen CSV dışa aktarma
 - Cihaza tarih, açıklama ve yapılan işlem bilgisiyle bakım kaydı ekleme
 - Cihazın bakım geçmişini görüntüleme
 
@@ -34,6 +35,18 @@ python3 ornek_veriler.py
 ```
 
 Örnek veri dosyası yalnızca `BT-001`, `BT-002` ve `BT-003` numaralı cihazlar henüz kayıtlı değilse bunları ekler; mevcut cihazları silmez.
+
+## CSV dışa aktarma
+
+Ana menüde `10` seçilerek cihazlar `envanter_listesi.csv` dosyasına aktarılır. Dosya Excel'de açılabilir. Mevcut CSV dosyası varsa yeni dışa aktarma sırasında üzerine yazılır.
+
+## Testler
+
+```bash
+python3 -m unittest -v
+```
+
+Testler geçici bir SQLite veritabanı kullanır; kendi `envanter.db` dosyanızı değiştirmez.
 
 ## Veritabanı
 
