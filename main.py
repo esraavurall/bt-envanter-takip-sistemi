@@ -1,3 +1,4 @@
+import csv
 import sqlite3
 from datetime import date
 
@@ -198,6 +199,56 @@ def bakim_gecmisi():
         print(f'Yapılan işlem: {islem}')
 
 
+def cihaz_duzenle():
+    no = input('Düzenlenecek demirbaş numarası: ').strip()
+    with baglan() as baglanti:
+        cihaz = baglanti.execute("""
+            SELECT cihaz_turu, birim, durum FROM cihazlar
+            WHERE demirbas_no = ?
+        """, (no,)).fetchone()
+    if cihaz is None:
+        print('Cihaz bulunamadı.')
+        return
+
+    print(f'\nMevcut cihaz türü: {cihaz[0]}')
+    print(f'Mevcut birim: {cihaz[1]}')
+    print(f'Mevcut durum: {cihaz[2]}')
+    tur = input('Yeni cihaz türü (boş bırak = değiştirme): ').strip() or cihaz[0]
+    birim = input('Yeni birim (boş bırak = değiştirme): ').strip() or cihaz[1]
+    durum = input('Yeni durum (boş bırak = değiştirme): ').strip() or cihaz[2]
+    if durum not in DURUMLAR:
+        print('Geçersiz durum. Güncelleme yapılmadı.')
+        return
+
+    with baglan() as baglanti:
+        baglanti.execute("""
+            UPDATE cihazlar SET cihaz_turu = ?, birim = ?, durum = ?
+            WHERE demirbas_no = ?
+        """, (tur, birim, durum, no))
+    print('Cihaz bilgileri güncellendi.')
+
+
+def csv_aktar():
+    dosya_adi = 'envanter_listesi.csv'
+    with baglan() as baglanti:
+        kayitlar = baglanti.execute("""
+            SELECT demirbas_no, cihaz_turu, birim, durum
+            FROM cihazlar ORDER BY id
+        """).fetchall()
+    if not kayitlar:
+        print('Aktarılacak cihaz bulunamadı.')
+        return
+    try:
+        with open(dosya_adi, 'w', newline='', encoding='utf-8-sig') as dosya:
+            yazici = csv.writer(dosya)
+            yazici.writerow(['Demirbaş No', 'Cihaz Türü', 'Birim', 'Durum'])
+            yazici.writerows(kayitlar)
+    except OSError as hata:
+        print(f'CSV dosyası oluşturulamadı: {hata}')
+        return
+    print(f'{len(kayitlar)} cihaz {dosya_adi} dosyasına aktarıldı.')
+
+
 def main():
     tablo_olustur()
     while True:
@@ -210,6 +261,8 @@ def main():
         print('6. Envanter özeti')
         print('7. Bakım kaydı ekle')
         print('8. Cihaz bakım geçmişi')
+        print('9. Cihaz bilgilerini düzenle')
+        print('10. Envanteri CSV olarak aktar')
         print('0. Çıkış')
         secim = input('Seçim: ').strip()
         if secim == '1':
@@ -228,6 +281,10 @@ def main():
             bakim_ekle()
         elif secim == '8':
             bakim_gecmisi()
+        elif secim == '9':
+            cihaz_duzenle()
+        elif secim == '10':
+            csv_aktar()
         elif secim == '0':
             print('Program kapatıldı.')
             break
